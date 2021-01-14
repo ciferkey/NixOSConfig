@@ -1,9 +1,9 @@
 { pkgs, ... }:
 
 {
-  home.packages = [
-    #pkgs.firefox
-    #pkgs.vim
+  home.packages = with pkgs; [
+    firefox
+    tilix
   ];
 
   programs.git = {
@@ -16,4 +16,14 @@
     enable = true;
     path = "…";
   };
+
+  programs.vim = {
+    enable = true;
+    plugins = with pkgs.vimPlugins; [ ];
+    settings = { ignorecase = true; };
+    extraConfig = ''
+      set mouse=a
+    '';
+  };
+
 }

@@ -81,7 +81,8 @@ in
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-   environment.systemPackages = with pkgs; [
+  environment.systemPackages = with pkgs; [
+    #gnomeExtensions.material-shell
    ];
 
   # Some programs need SUID wrappers, can be configured further or are

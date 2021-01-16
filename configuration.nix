@@ -4,14 +4,18 @@
 
 { config, pkgs, ... }:
 
-# based off https://nixos.wiki/wiki/Home_Manager
-# note on matching versions:  https://github.com/nix-community/home-manager/issues/1645#issuecomment-739666499
 let
+  # based off https://nixos.wiki/wiki/Home_Manager
+  # note on matching versions:  https://github.com/nix-community/home-manager/issues/1645#issuecomment-739666499
   home-manager = builtins.fetchGit {
     url = "https://github.com/rycee/home-manager.git";
     rev = "22f6736e628958f05222ddaadd7df7818fe8f59d"; # CHANGEME 
     ref = "release-20.09";
   };
+  # https://functor.tokyo/blog/2018-02-18-install-packages-from-nixos-unstable
+  unstableTarball =
+    fetchTarball
+      https://github.com/NixOS/nixpkgs-channels/archive/nixos-unstable.tar.gz;
 in
 {
   imports =
@@ -21,26 +25,24 @@ in
     ];
 
   home-manager.users.ciferkey = import ./home.nix;
-  # Use the GRUB 2 boot loader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
-  # boot.loader.grub.efiSupport = true;
-  # boot.loader.grub.efiInstallAsRemovable = true;
-  # boot.loader.efi.efiSysMountPoint = "/boot/efi";
-  # Define on which hard drive you want to install Grub.
-   boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
-  # networking.hostName = "nixos"; # Define your hostname.
+  # Use the systemd-boot EFI boot loader.
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  networking.hostName = "nixie-tube"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Set your time zone.
-  # time.timeZone = "Europe/Amsterdam";
+  time.timeZone = "America/New_York";
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.enp0s3.useDHCP = true;
+  networking.interfaces.enp0s31f6.useDHCP = true;
+  networking.interfaces.wlp0s20f3.useDHCP = true;
+
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -75,14 +77,32 @@ in
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.ciferkey = {
-     isNormalUser = true;
+    isNormalUser = true;
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+  };
+
+  nixpkgs.config = {
+    packageOverrides = pkgs: {
+      unstable = import unstableTarball {
+        config = config.nixpkgs.config;
+      };
+    };
   };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    #gnomeExtensions.material-shell
+    git
+    gnome-firmware-updater
+    gnomeExtensions.appindicator
+    # marked as broken
+    #gnomeExtensions.topicons-plus
+    #unstable.gnomeExtensions.material-shell
+    gnome3.nautilus
+    gnome3.gnome-tweaks
+    htop
+    wireguard
+    unzip
    ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -112,7 +132,21 @@ in
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "20.09"; # Did you read the comment?
 
-  virtualisation.virtualbox.guest.enable = true;
-
   services.gnome3.core-utilities.enable = false;
+  # needed to change theme
+  services.dbus.packages = with pkgs; [ gnome3.dconf ];
+  #gtk.theme.name = "Adwaita"
+
+
+  hardware.cpu.intel.updateMicrocode = true;
+  hardware.bluetooth.enable = true;
+
+  # Finger reader support
+  services.fprintd.enable = true;
+  security.pam.services.login.fprintAuth = true;
+  security.pam.services.xscreensaver.fprintAuth = true;
+  
+  # Needed for mullvad
+  networking.iproute2.enable = true; 
 }
+

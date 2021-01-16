@@ -1,8 +1,22 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    "discord"
+    "idea-ultimate"
+  ];
+
   home.packages = with pkgs; [
+    deluge
+    discord
+    dos2unix
     firefox
+    google-cloud-sdk
+    jdk11
+    jetbrains.idea-ultimate
+    mpv
+    mullvad-vpn
+    python3
     tilix
   ];
 
@@ -10,6 +24,11 @@
     enable = true;
     userName  = "ciferkey";
     userEmail = "ciferkey@gmail.com";
+    extraConfig = {
+      core = {
+        autocrlf = true;
+      };
+    };
   };
 
   programs.home-manager = {

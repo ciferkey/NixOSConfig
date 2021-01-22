@@ -78,7 +78,7 @@ in
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.ciferkey = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "docker" "wheel" ]; # Enable ‘sudo’ for the user.
   };
 
   nixpkgs.config = {
@@ -92,6 +92,7 @@ in
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    clipit
     git
     gnome-firmware-updater
     gnomeExtensions.appindicator
@@ -148,5 +149,7 @@ in
   
   # Needed for mullvad
   networking.iproute2.enable = true; 
+
+  virtualisation.docker.enable = true;
 }
 

@@ -78,6 +78,7 @@ in
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.ciferkey = {
     isNormalUser = true;
+    shell = pkgs.zsh;
     extraGroups = [ "docker" "wheel" ]; # Enable ‘sudo’ for the user.
   };
 
@@ -104,6 +105,7 @@ in
     htop
     wireguard
     unzip
+    zsh
    ];
 
   # Some programs need SUID wrappers, can be configured further or are
